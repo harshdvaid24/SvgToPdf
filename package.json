@@ -1,0 +1,25 @@
+{
+  "name": "svg-to-pdf-api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "jspdf": "^2.5.2",
+    "svg2pdf.js": "^1.5.0"
+  },
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/harshdvaid24/SvgToPdf.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/harshdvaid24/SvgToPdf/issues"
+  },
+  "homepage": "https://github.com/harshdvaid24/SvgToPdf#readme"
+}
