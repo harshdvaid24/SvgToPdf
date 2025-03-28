@@ -1,32 +1,36 @@
 const express = require('express');
-const {jsPDF} = require('jspdf');
-const svg2pdf = require('svg2pdf.js');
+const PDFDocument = require('pdfkit');
+const SVGtoPDF = require('svg-to-pdfkit');
+const {JSDOM} = require('jsdom');
 const app = express();
-const port = process.env.PORT || 3000;
+app.use(express.json({limit: '10mb'}));
 
-// Middleware to parse JSON bodies
-app.use(express.json({limit: '10mb'})); // Adjust limit as needed for SVG size
-
-// Endpoint to generate PDF from SVG
 app.post('/generate-pdf', (req, res) => {
     try {
         const svgString = req.body.svg;
-        if (!svgString) {
-            return res.status(400).send('SVG string is required in the request body');
-        }
+        if (!svgString) return res.status(400).send('SVG string is required');
 
-        const doc = new jsPDF();
-        svg2pdf(svgString, doc, {x: 0, y: 0});
-        const pdfBuffer = doc.output('arraybuffer'); // Use 'arraybuffer' for binary data
+        // Optional: Validate SVG with jsdom
+        const dom = new JSDOM(`<!DOCTYPE html><body>${svgString}</body>`);
+        const svgElement = dom.window.document.querySelector('svg');
+        if (!svgElement) throw new Error('Invalid SVG: No SVG element found');
+
+        // Create a new PDF document with PDFKit
+        const doc = new PDFDocument(); // Match SVG size
         res.set('Content-Type', 'application/pdf');
-        res.send(Buffer.from(pdfBuffer)); // Send as Buffer for proper binary handling
+
+        // Pipe the PDF directly to the response
+        doc.pipe(res);
+
+        // Render SVG into the PDF at position (0,0)
+        SVGtoPDF(doc, svgString, 0, 0); // Match SVG size
+
+        // Finalize the PDF
+        doc.end();
     } catch (error) {
         console.error('Error generating PDF:', error);
-        res.status(500).send('Error generating PDF');
+        res.status(500).send(`Error generating PDF: ${error.message}`);
     }
 });
 
-// Start the server
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-});
+app.listen(process.env.PORT || 3000, () => console.log('Server running'));
